@@ -1,0 +1,22 @@
+Source: gpbackup-s3-plugin
+Maintainer: Greengage <greengage@greengagedb.org>
+Section: database
+Build-Depends: debhelper (>= 13),
+	build-essential
+Standards-Version: 4.6.0
+
+Package: gpbackup-s3-plugin
+Architecture: any
+Depends: ${shlibs:Depends},
+  greengage6 | greengage7,
+  gpbackup
+Description: S3 plugin for use with Greengage Backup and Restore utilities
+ The S3 plugin lets you use an Amazon Simple Storage Service (Amazon S3)
+ location to store and retrieve backups when you run gpbackup and gprestore.
+ To use the S3 plugin, you specify the location of the plugin and the AWS
+ login and backup location in a configuration file. When you run gpbackup
+ or gprestore, you specify the configuration file with the option
+ --plugin-config. If you perform a backup operation with the gpbackup
+ option --plugin-config, you must also specify the --plugin-config option
+ when you restore the backup with gprestore. The S3 plugin supports both
+ AWS and custom storage servers that implement the S3 interface.

@@ -23,3 +23,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Generated during deb packaging
+debian/changelog
+debian/*.install

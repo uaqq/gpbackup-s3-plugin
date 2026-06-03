@@ -1,0 +1,44 @@
+#!/usr/bin/make -f
+
+DH_VERBOSE = 1
+
+GPBACKUP_S3_PLUGIN_HOME ?= /opt/greengagedb/gpbackup-s3-plugin
+GPBACKUP_S3_PLUGIN_HOME_REL := $(GPBACKUP_S3_PLUGIN_HOME:/%=%)
+
+export DH_OPTIONS := $(DH_OPTIONS)
+export DEB_BUILD_OPTIONS = nocheck
+export PATH := /usr/local/go/bin:$(PATH)
+export CGO_ENABLED = 1
+export GOPATH ?= $(HOME)/go
+# Go embeds VCS info at build time and runs git; the build user differs from the
+# repo owner, so git aborts with "dubious ownership". Disable VCS stamping.
+export GOFLAGS = -buildvcs=false
+
+BUILD_DIR := $(CURDIR)/_build
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	@echo "Skipping clean"
+
+override_dh_auto_configure:
+	@echo "=== Generating .install files ==="
+	sed 's|@GPBACKUP_S3_PLUGIN_HOME_REL@|$(GPBACKUP_S3_PLUGIN_HOME_REL)|g' debian/gpbackup-s3-plugin.install.in > debian/gpbackup-s3-plugin.install
+
+override_dh_auto_build:
+	@echo "=== Building gpbackup-s3-plugin binaries ==="
+	mkdir -p $(BUILD_DIR)
+	$(MAKE) build BIN_DIR=$(BUILD_DIR)
+
+override_dh_auto_install:
+	@echo "=== Installing gpbackup-s3-plugin binaries ==="
+	install -D -m 755 $(BUILD_DIR)/gpbackup_s3_plugin        $(CURDIR)/debian/tmp/$(GPBACKUP_S3_PLUGIN_HOME_REL)/bin/gpbackup-s3-plugin
+
+override_dh_dwz:
+	@echo "Skipping debug symbols compression (not working properly with Golang)"
+
+override_dh_gencontrol:
+	@echo "=== Generating control files ==="
+	dh_gencontrol
+	
