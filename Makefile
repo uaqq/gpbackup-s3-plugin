@@ -78,6 +78,8 @@ install : build
 
 DATE_RFC := $(shell date -R)
 
+.PHONY: version-vars changelog deb
+
 version-vars:
 	$(eval PACKAGE_NAME    := $(shell grep '^Source:' debian/control | awk '{print $$2}'))
 	$(eval MAINTAINER      := $(shell grep '^Maintainer:' debian/control | sed 's/Maintainer: //'))

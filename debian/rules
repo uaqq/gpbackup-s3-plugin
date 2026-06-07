@@ -41,4 +41,4 @@ override_dh_dwz:
 override_dh_gencontrol:
 	@echo "=== Generating control files ==="
 	dh_gencontrol
-	
+
