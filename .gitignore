@@ -27,3 +27,4 @@ _testmain.go
 # Generated during deb packaging
 debian/changelog
 debian/*.install
+_build
