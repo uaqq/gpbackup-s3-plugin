@@ -104,7 +104,7 @@ debian/changelog : version-info
 	@echo " -- $(MAINTAINER)  $(DATE_RFC)" >> $@
 
 deb : debian/changelog
-	dpkg-buildpackage -us -uc -b
+	debuild --preserve-env -us -uc -b
 
 clean :
 		# Build artifacts
