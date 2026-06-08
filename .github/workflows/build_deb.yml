@@ -10,6 +10,7 @@ on:
 jobs:
   build_deb:
     strategy:
+      fail-fast: false
       matrix:
         ubuntu_version: ["22.04", "24.04"]
     uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-deb-native.yml@v43
