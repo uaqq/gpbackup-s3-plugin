@@ -22,3 +22,4 @@ jobs:
       test_docker: "ubuntu:${{ matrix.ubuntu_version }}"
       add_greengage_repo: true
       greengage_repo_url: "https://storage.yandexcloud.net/greengage-repo"
+      verify_commands: dpkg -l greengage* gpbackup*
