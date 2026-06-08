@@ -5,7 +5,7 @@ DH_VERBOSE = 1
 GPBACKUP_S3_PLUGIN_HOME ?= /opt/greengagedb/gpbackup-s3-plugin
 GPBACKUP_S3_PLUGIN_HOME_REL := $(GPBACKUP_S3_PLUGIN_HOME:/%=%)
 
-export DH_OPTIONS := $(DH_OPTIONS)
+export DH_OPTIONS = -v
 export DEB_BUILD_OPTIONS = nocheck
 export PATH := /usr/local/go/bin:$(PATH)
 export CGO_ENABLED = 1
