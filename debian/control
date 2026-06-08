@@ -2,7 +2,6 @@ Source: gpbackup-s3-plugin
 Maintainer: Greengage <greengage@greengagedb.org>
 Section: database
 Build-Depends: debhelper (>= 13),
-	 dh-python,
 	 lsb-release
 Standards-Version: 4.6.0
 
