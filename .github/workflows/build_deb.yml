@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         ubuntu_version: ["22.04", "24.04"]
-    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-deb-native.yml@v43
+    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-deb-native.yml@CI-5788
     with:
       go_version: "1.23"
       artifact_name: "gpbackup-s3-plugin-deb-ubuntu${{ matrix.ubuntu_version }}"
