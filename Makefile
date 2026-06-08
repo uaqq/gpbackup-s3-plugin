@@ -78,7 +78,7 @@ install : build
 
 DATE_RFC := $(shell date -R)
 
-.PHONY: version-vars changelog deb
+.PHONY: changelog deb version-vars version-vars version-info
 
 version-vars:
 	$(eval PACKAGE_NAME    := $(shell grep '^Source:' debian/control | awk '{print $$2}'))
@@ -88,14 +88,21 @@ version-vars:
 	$(eval IS_RELEASE      := $(if $(findstring ~dev,$(PACKAGE_VERSION)),no,yes))
 	$(eval BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build))
 
+version-info : version-vars
+	@echo "PACKAGE_NAME: $(PACKAGE_NAME)"
+	@echo "MAINTAINER: $(MAINTAINER)"
+	@echo "PACKAGE_VERSION: $(PACKAGE_VERSION)"
+	@echo "DISTRO_CODENAME: $(DISTRO_CODENAME)"
+	@echo "IS_RELEASE: $(IS_RELEASE)"
+	@echo "BUILD_TYPE: $(BUILD_TYPE)"
+
+changelog: debian/changelog
 debian/changelog: version-vars
 	@echo "$(PACKAGE_NAME) ($(PACKAGE_VERSION)) $(DISTRO_CODENAME); urgency=low" > $@
 	@echo "" >> $@
 	@echo "  * $(BUILD_TYPE)" >> $@
 	@echo "" >> $@
 	@echo " -- $(MAINTAINER)  $(DATE_RFC)" >> $@
-
-changelog: debian/changelog
 
 deb: debian/changelog
 	dpkg-buildpackage -us -uc -b
