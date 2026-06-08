@@ -86,7 +86,6 @@ version-vars:
 	$(eval PACKAGE_VERSION := $(shell git describe --tags 2>/dev/null | perl -pe 's/^v//; s/(.*)-([0-9]+)-(g[0-9a-f]+)/\1~dev.\2.\3/', 0.0.0-unknown))
 	$(eval DISTRO_CODENAME := $(shell lsb_release -sc))
 	$(eval IS_RELEASE      := $(if $(findstring ~dev,$(PACKAGE_VERSION)),no,yes))
-	$(eval STABILITY       := $(if $(filter yes,$(IS_RELEASE)),stable,unstable))
 	$(eval BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build))
 
 debian/changelog: version-vars
