@@ -36,8 +36,3 @@ override_dh_auto_install:
 
 override_dh_dwz:
 	@echo "Skipping debug symbols compression (not working properly with Golang)"
-
-override_dh_gencontrol:
-	@echo "=== Generating control files ==="
-	dh_gencontrol
-
