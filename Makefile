@@ -18,6 +18,13 @@ GOIMPORTS=$(GOPATH)/bin/goimports
 GO_ENV=GO111MODULE=on # ensure the project still compiles in $GOPATH/src using golang versions 1.12 and below
 DEBUG=-gcflags=all="-N -l"
 
+PACKAGE_NAME    := $(shell grep '^Source:' debian/control | awk '{print $$2}')
+MAINTAINER      := $(shell grep '^Maintainer:' debian/control | sed 's/Maintainer: //')
+PACKAGE_VERSION := $(or $(shell git describe --tags 2>/dev/null | perl -pe 's/^v//; s/(.*)-([0-9]+)-(g[0-9a-f]+)/\1~dev.\2.\3/'),0.0.0-unknown)
+DISTRO_CODENAME := $(shell lsb_release -sc)
+IS_RELEASE      := $(if $(findstring ~dev,$(PACKAGE_VERSION)),no,yes)
+BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build))
+
 # Prefer gpsync as the newer utility, fall back to gpscp if not present (older installs)
 ifeq (, $(shell which gpsync))
 COPYUTIL=gpscp
@@ -78,17 +85,9 @@ install : build
 
 DATE_RFC := $(shell date -R)
 
-.PHONY: changelog deb version-vars version-vars version-info
+.PHONY: changelog deb version-info
 
-version-vars:
-	$(eval PACKAGE_NAME    := $(shell grep '^Source:' debian/control | awk '{print $$2}'))
-	$(eval MAINTAINER      := $(shell grep '^Maintainer:' debian/control | sed 's/Maintainer: //'))
-	$(eval PACKAGE_VERSION := $(or $(shell git describe --tags 2>/dev/null | perl -pe 's/^v//; s/(.*)-([0-9]+)-(g[0-9a-f]+)/\1~dev.\2.\3/'),0.0.0-unknown))
-	$(eval DISTRO_CODENAME := $(shell lsb_release -sc))
-	$(eval IS_RELEASE      := $(if $(findstring ~dev,$(PACKAGE_VERSION)),no,yes))
-	$(eval BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build))
-
-version-info : version-vars
+version-info :
 	@echo "PACKAGE_NAME: $(PACKAGE_NAME)"
 	@echo "MAINTAINER: $(MAINTAINER)"
 	@echo "PACKAGE_VERSION: $(PACKAGE_VERSION)"
@@ -96,15 +95,15 @@ version-info : version-vars
 	@echo "IS_RELEASE: $(IS_RELEASE)"
 	@echo "BUILD_TYPE: $(BUILD_TYPE)"
 
-changelog: debian/changelog
-debian/changelog: version-vars
+changelog : debian/changelog
+debian/changelog : version-info
 	@echo "$(PACKAGE_NAME) ($(PACKAGE_VERSION)) $(DISTRO_CODENAME); urgency=low" > $@
 	@echo "" >> $@
 	@echo "  * $(BUILD_TYPE)" >> $@
 	@echo "" >> $@
 	@echo " -- $(MAINTAINER)  $(DATE_RFC)" >> $@
 
-deb: debian/changelog
+deb : debian/changelog
 	dpkg-buildpackage -us -uc -b
 
 clean :
