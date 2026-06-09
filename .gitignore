@@ -25,9 +25,13 @@ _testmain.go
 *.prof
 
 # Generated during deb packaging
-debian/changelog
-debian/*.install
-_build
+**/debian/*
+!**/debian/*.in
+!**/debian/co*
+!**/debian/lint*
+!**/debian/rules
 
-# Runtime VERSION file
+# Local excludes in root directory
 /VERSION
+/Package/
+/RPM/

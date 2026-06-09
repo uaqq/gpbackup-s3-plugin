@@ -1,0 +1,56 @@
+# .github/workflows/ci.yml
+name: Build and Test
+
+on:
+  push:
+    branches: ['master']
+    tags: ['**']
+  pull_request:
+    branches: ['**']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os_version:
+          - '22.04'
+          - '24.04'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg OS_VERSION=${{ matrix.os_version }} \
+            --tag gpbackup-s3-plugin:${{ matrix.os_version }} \
+            -f ci/Dockerfile.ubuntu .
+
+      - name: Extract artifacts
+        run: |
+          mkdir artifacts
+          docker create --name temp-container gpbackup-s3-plugin:${{ matrix.os_version }}
+          docker cp temp-container:/home/gpadmin/deb-packages artifacts/
+          docker cp temp-container:/home/gpadmin/bin artifacts/
+          docker rm temp-container
+
+      - name: Upload deb packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpbackup-s3-plugin-deb-ubuntu${{ matrix.os_version }}
+          path: artifacts/deb-packages/
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpbackup-s3-plugin-bin-ubuntu${{ matrix.os_version }}
+          path: artifacts/bin/

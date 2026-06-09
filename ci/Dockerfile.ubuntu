@@ -1,0 +1,52 @@
+ARG OS_VERSION=22.04
+
+FROM ubuntu:${OS_VERSION} AS base
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN useradd -md /home/gpadmin gpadmin
+WORKDIR /home/gpadmin
+
+ARG GO_VERSION=1.26.4
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN set -eux; \
+    apt-get update -q; \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        debhelper \
+        devscripts \
+        git \
+        lsb-release \
+        curl \
+        ca-certificates \
+        perl; \
+    apt-get clean ; \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/* /var/log/*
+
+RUN set -eux; \
+    curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz \
+        | tar -C /usr/local -xz
+
+ENV PATH=/usr/local/go/bin:$PATH \
+    GOPATH=/home/gpadmin/go \
+    GO111MODULE=on \
+    CGO_ENABLED=1 \
+    GOFLAGS=-buildvcs=false
+
+FROM base AS build
+
+RUN  mkdir bin deb-packages && chown gpadmin:gpadmin bin deb-packages
+COPY --chown=gpadmin:gpadmin . src
+
+ENV TARGET_OS=ubuntu
+
+USER gpadmin
+
+RUN make -C src pkg VERSION
+
+FROM base AS clean
+USER gpadmin
+
+COPY --chown=gpadmin:gpadmin --exclude=.git/ --exclude=.gitignore --exclude=.github/ . src
+COPY --from=build /home/gpadmin/src/VERSION src
+COPY --from=build ${GOPATH}/bin bin
+COPY --from=build /home/gpadmin/deb-packages deb-packages

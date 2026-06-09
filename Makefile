@@ -10,7 +10,11 @@ S3_PLUGIN=gpbackup_s3_plugin
 DIR_PATH=$(shell dirname `pwd`)
 BIN_DIR=$(shell echo $${GOPATH:-~/go} | awk -F':' '{ print $$1 "/bin"}')
 
-GIT_VERSION := $(shell git describe --tags | perl -pe 's/(.*)-([0-9]*)-(g[0-9a-f]*)/\1+dev.\2.\3/')
+GIT_VERSION := $(or $(shell git describe --tags 2>/dev/null | perl -pe 's/(.*)-([0-9]*)-(g[0-9a-f]*)/\1+dev.\2.\3/'),$(shell cat VERSION))
+ifeq ($(GIT_VERSION),)
+$(error GIT_VERSION is empty: run from a git repo with tags or provide a VERSION file)
+endif
+
 PLUGIN_VERSION_STR="-X github.com/GreengageDB/gpbackup-s3-plugin/s3plugin.Version=$(GIT_VERSION)"
 GOLANG_LINTER=$(GOPATH)/bin/golangci-lint
 GINKGO=$(GOPATH)/bin/ginkgo
@@ -76,41 +80,68 @@ install : build
 		fi; \
 		rm /tmp/seg_hosts
 
-DATE_RFC := $(shell date -R)
+#---------------------------------------------------------------------
+# Packaging targets with changelog options
+#---------------------------------------------------------------------
 
-.PHONY: changelog deb version-vars version-info
+# Metadata vars
+GPROOT			:= /opt/greengagedb
+PACKAGE_NAME	:= $(shell grep '^Package:' debian/control | head -1 | awk '{print $$2}')
+MAINTAINER		:= $(shell grep '^Maintainer:' debian/control | sed 's/Maintainer: //')
+DATE_RFC		:= $(shell date -R)
+DISTRO_CODENAME := $(shell lsb_release -sc)
+IS_RELEASE      := $(if $(findstring ~dev,$(GIT_VERSION)),no,yes)
+BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build)
+DEB_TOPDIR		?= $(CURDIR)/../deb-packages
+RPM_TOPDIR		?= $(CURDIR)/../RPM
 
-version-vars:
-	$(eval PACKAGE_NAME    := $(shell grep '^Source:' debian/control | awk '{print $$2}'))
-	$(eval MAINTAINER      := $(shell grep '^Maintainer:' debian/control | sed 's/Maintainer: //'))
-	$(eval PACKAGE_VERSION := $(or $(shell git describe --tags 2>/dev/null | perl -pe 's/^v//; s/(.*)-([0-9]+)-(g[0-9a-f]+)/\1~dev.\2.\3/'),0.0.0-unknown))
-	$(eval DISTRO_CODENAME := $(shell lsb_release -sc))
-	$(eval IS_RELEASE      := $(if $(findstring ~dev,$(PACKAGE_VERSION)),no,yes))
-	$(eval BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build))
+# Generate for Dockerfile where .git is absent
+VERSION :
+	@echo "Update $@"
+	@echo "$(GIT_VERSION)" > $@
+	@cat $@
 
-version-info : version-vars
-	@echo "PACKAGE_NAME: $(PACKAGE_NAME)"
-	@echo "MAINTAINER: $(MAINTAINER)"
-	@echo "PACKAGE_VERSION: $(PACKAGE_VERSION)"
-	@echo "DISTRO_CODENAME: $(DISTRO_CODENAME)"
-	@echo "IS_RELEASE: $(IS_RELEASE)"
-	@echo "BUILD_TYPE: $(BUILD_TYPE)"
-
-changelog: debian/changelog
-debian/changelog: version-vars
-	@echo "$(PACKAGE_NAME) ($(PACKAGE_VERSION)) $(DISTRO_CODENAME); urgency=low" > $@
+debian/changelog:
+	@echo "$(PACKAGE_NAME) ($(GIT_VERSION)) $(DISTRO_CODENAME); urgency=low" > $@
 	@echo "" >> $@
 	@echo "  * $(BUILD_TYPE)" >> $@
 	@echo "" >> $@
 	@echo " -- $(MAINTAINER)  $(DATE_RFC)" >> $@
 
-deb: debian/changelog
-	debuild -us -uc -b
+debian/install:
+	@echo "$(PACKAGE_NAME)/* /" > $@
+
+# Default packaging target
+pkg : pkg-info pkg-deb
+
+# Display package info
+pkg-info :
+	@echo "PACKAGE_NAME: $(PACKAGE_NAME)"
+	@echo "MAINTAINER: $(MAINTAINER)"
+	@echo "DATE_RFC: $(DATE_RFC)"
+	@echo "GIT_VERSION: $(GIT_VERSION)"
+	@echo "DISTRO_CODENAME: $(DISTRO_CODENAME)"
+	@echo "IS_RELEASE: $(IS_RELEASE)"
+	@echo "BUILD_TYPE: $(BUILD_TYPE)"
+
+# Build Debian package
+pkg-deb : debian/changelog debian/install
+	@GPROOT="$(GPROOT)" PACKAGE_NAME="$(PACKAGE_NAME)" debuild --preserve-env -us -uc -b
+	@mkdir -p $(DEB_TOPDIR)
+	@find $(CURDIR)/../ -maxdepth 1 -type f \( -name "*.deb" \
+											-o -name "*.ddeb" \
+											-o -name "*.build" \
+											-o -name "*.buildinfo" \
+											-o -name "*.changes" \) \
+											-exec mv -f {} $(DEB_TOPDIR)/ \;
+
+.PHONY: debian/changelog debian/install pkg pkg-info pkg-deb
 
 clean :
-		# Build artifacts
-		rm -f $(BIN_DIR)/$(S3_PLUGIN)
-		# Test artifacts
-		rm -rf /tmp/go-build*
-		rm -rf /tmp/gexec_artifacts*
-		rm -rf /tmp/ginkgo*
+	# Build artifacts
+	rm -f $(BIN_DIR)/$(S3_PLUGIN)
+	# Test artifacts
+	rm -rf /tmp/go-build*
+	rm -rf /tmp/gexec_artifacts*
+	rm -rf /tmp/ginkgo*
+	@if [ -d .git ] ; then rm -f VERSION; fi
