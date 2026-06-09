@@ -43,10 +43,15 @@ USER gpadmin
 
 RUN make -C src pkg VERSION
 
+FROM base AS code
+# Use --exclude, when it will be available in stable syntax.
+COPY --chown=gpadmin:gpadmin . src
+RUN rm -rf src/.git*
+
 FROM base AS clean
 USER gpadmin
 
-COPY --chown=gpadmin:gpadmin --exclude=.git/ --exclude=.gitignore --exclude=.github/ . src
+COPY --from=code  /home/gpadmin/src src
 COPY --from=build /home/gpadmin/src/VERSION src
 COPY --from=build ${GOPATH}/bin bin
 COPY --from=build /home/gpadmin/deb-packages deb-packages
