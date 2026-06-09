@@ -28,3 +28,6 @@ _testmain.go
 debian/changelog
 debian/*.install
 _build
+
+# Runtime VERSION file
+/VERSION
