@@ -29,11 +29,13 @@ jobs:
           fetch-tags: true
 
       - name: Build Docker image
-        run: |
-          docker build \
-            --build-arg OS_VERSION=${{ matrix.os_version }} \
-            --tag gpbackup-s3-plugin:${{ matrix.os_version }} \
-            -f ci/Dockerfile.ubuntu .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ci/Dockerfile.ubuntu
+          push: false
+          tags: gpbackup-s3-plugin:${{ matrix.os_version }}
+          build-args: OS_VERSION=${{ matrix.os_version }}
 
       - name: Extract artifacts
         run: |
