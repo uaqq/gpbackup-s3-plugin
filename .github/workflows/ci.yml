@@ -56,3 +56,9 @@ jobs:
         with:
           name: gpbackup-s3-plugin-bin-ubuntu${{ matrix.os_version }}
           path: artifacts/bin/
+
+      - name: Test deb package installation
+        uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@CI-5788
+        with:
+          test_docker: 'ubuntu:${{ matrix.os_version }}'
+          artifact_name: 'gpbackup-s3-plugin-deb-ubuntu${{ matrix.os_version }}'
