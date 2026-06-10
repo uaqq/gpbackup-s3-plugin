@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -46,19 +46,19 @@ jobs:
           docker rm temp-container
 
       - name: Upload deb packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gpbackup-s3-plugin-deb-ubuntu${{ matrix.os_version }}
           path: artifacts/deb-packages/
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gpbackup-s3-plugin-bin-ubuntu${{ matrix.os_version }}
           path: artifacts/bin/
 
       - name: Test deb package installation
-        uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@CI-5788
+        uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v44
         with:
           test_docker: 'ubuntu:${{ matrix.os_version }}'
           artifact_name: 'gpbackup-s3-plugin-deb-ubuntu${{ matrix.os_version }}'
