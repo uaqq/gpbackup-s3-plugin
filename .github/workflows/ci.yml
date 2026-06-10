@@ -64,7 +64,6 @@ jobs:
           artifact_name: 'gpbackup-s3-plugin-deb-ubuntu${{ matrix.os_version }}'
           add_greengage_repo: true
           greengage_repo_url: "https://storage.yandexcloud.net/greengage-repo"
-          pre_install_commands: |
-            AsDf
-            aSdF
-          verify_commands: dpkg -l gpbackup*
+          verify_commands: |
+            dpkg -l gpbackup*
+            WTF is it?
