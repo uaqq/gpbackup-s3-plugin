@@ -4,7 +4,7 @@ Builds and tests `gpbackup-s3-plugin` inside a Docker container for Ubuntu 22.04
 
 ## Actual version
 
-- `.github/workflows/ci.yml`
+- `.github/workflows/build_and_package.yml`
 
 ## What it does
 

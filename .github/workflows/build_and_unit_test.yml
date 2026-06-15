@@ -1,0 +1,44 @@
+name: build_and_unit_test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# Concurrency control to cancel previous runs on new push to same PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true  # Automatically cancel any previous runs for the same group
+
+jobs:
+
+  build_and_unit_test:
+    runs-on: ubuntu-latest
+    env:
+      GOPATH: /home/runner/work/gpbackup-s3-plugin/gpbackup-s3-plugin/go
+    defaults:
+      run:
+        working-directory: go/src/github.com/GreengageDB/gpbackup-s3-plugin
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+        path: go/src/github.com/GreengageDB/gpbackup-s3-plugin
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: "1.23"
+
+    - name: Dependencies
+      run: |
+        go install github.com/onsi/ginkgo/v2/ginkgo
+        make depend
+
+    - name: Build
+      run: make build
+
+    - name: Unit Test
+      run: make test

@@ -1,5 +1,5 @@
-# .github/workflows/ci.yml
-name: build_and_unit_test
+# .github/workflows/build_and_package.yml
+name: Build, test and Package in Docker
 
 on:
   push:
