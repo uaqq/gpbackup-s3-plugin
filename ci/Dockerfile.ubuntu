@@ -1,3 +1,9 @@
+# FILE:    ci/Dockerfile.ubuntu
+# CONTEXT: Build biaries and deb-package on Ubuntu <OS_VERSION>
+# PURPOSE: Multi-stage Docker build for GPBackup S3 Plugin
+
+# hadolint global ignore=DL3008 # We need the newest packages for develop
+
 ARG OS_VERSION=22.04
 
 FROM ubuntu:${OS_VERSION} AS base
@@ -5,8 +11,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN useradd -md /home/gpadmin gpadmin
 WORKDIR /home/gpadmin
 
-ARG GO_VERSION=1.26.4
-ARG DEBIAN_FRONTEND=noninteractive
+ARG GO_VERSION=1.26.4 \
+    DEBIAN_FRONTEND=noninteractive
 
 RUN set -eux; \
     apt-get update -q; \
@@ -27,22 +33,20 @@ RUN set -eux; \
     curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz \
         | tar -C /usr/local -xz
 
-ENV PATH=/usr/local/go/bin:$PATH \
-    GOPATH=/home/gpadmin/go \
+ENV GOPATH=/home/gpadmin/go \
     GO111MODULE=on \
     CGO_ENABLED=1 \
     GOFLAGS=-buildvcs=false
+ENV PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
 
 FROM base AS build
 
 RUN  mkdir bin deb-packages && chown gpadmin:gpadmin bin deb-packages
 COPY --chown=gpadmin:gpadmin . src
 
-ENV TARGET_OS=ubuntu
-
 USER gpadmin
 
-RUN make -C src pkg VERSION
+RUN make -C src test pkg VERSION
 
 FROM base AS code
 # Use --exclude, when it will be available in stable syntax.
@@ -54,5 +58,5 @@ USER gpadmin
 
 COPY --from=code  /home/gpadmin/src src
 COPY --from=build /home/gpadmin/src/VERSION src
-COPY --from=build ${GOPATH}/bin bin
+COPY --from=build $GOPATH/bin bin
 COPY --from=build /home/gpadmin/deb-packages deb-packages

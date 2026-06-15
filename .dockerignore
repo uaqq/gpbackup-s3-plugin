@@ -1,0 +1,47 @@
+# For multistage binaries and packages build
+
+# Compiled Go artifacts
+*.o
+*.a
+*.so
+_obj
+_test
+*.[568vq]
+[568vq].out
+
+# CGo generated files
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+_testmain.go
+
+# Binaries and profiles
+*.exe
+*.test
+*.prof
+
+# Local packaging artifacts
+/Package/
+/RPM/
+
+# === DOCKER SPECIFIC ===
+
+# Docker files
+Dockerfile*
+.dockerignore
+
+# Docs
+*.md
+README*
+LICENSE*
+
+# Logs and temp files
+*.log
+*.tmp
+
+# IDE
+.idea/
+.vscode/
+*.swp
