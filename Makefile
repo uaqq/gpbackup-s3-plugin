@@ -138,10 +138,10 @@ pkg-deb : debian/changelog debian/install
 .PHONY: debian/changelog debian/install pkg pkg-info pkg-deb
 
 clean :
-	# Build artifacts
-	rm -f $(BIN_DIR)/$(S3_PLUGIN)
-	# Test artifacts
-	rm -rf /tmp/go-build*
-	rm -rf /tmp/gexec_artifacts*
-	rm -rf /tmp/ginkgo*
-	@if [ -d .git ] ; then rm -f VERSION; fi
+		# Build artifacts
+		rm -f $(BIN_DIR)/$(S3_PLUGIN)
+		# Test artifacts
+		rm -rf /tmp/go-build*
+		rm -rf /tmp/gexec_artifacts*
+		rm -rf /tmp/ginkgo*
+		@if [ -d .git ] ; then rm -f VERSION; fi
