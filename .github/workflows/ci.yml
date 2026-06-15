@@ -1,5 +1,5 @@
 # .github/workflows/ci.yml
-name: Build and Test
+name: build_and_unit_test
 
 on:
   push:
