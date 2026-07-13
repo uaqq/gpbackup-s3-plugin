@@ -23,3 +23,15 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Generated during deb packaging
+**/debian/*
+!**/debian/*.in
+!**/debian/co*
+!**/debian/lint*
+!**/debian/rules
+
+# Local excludes in root directory
+/VERSION
+/Package/
+/RPM/
