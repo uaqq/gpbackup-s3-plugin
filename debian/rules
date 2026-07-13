@@ -16,9 +16,9 @@ BIN_DIR ?= ${GOPATH}/bin
 	dh $@
 
 override_dh_auto_install:
-	@echo "=== Installing $(PACKAGE_NAME) from $(BIN_DIR)/$(BIN) to $(PACKAGE_NAME)$(GPROOT) ==="
+	@echo "=== Installing $(PACKAGE_NAME) from $(BIN_DIR)/$(BIN) to $(PACKAGE_NAME)$(GPROOT)/$(PACKAGE_NAME) ==="
 	@mkdir -p $(CURDIR)/debian/tmp/$(PACKAGE_NAME)$(GPROOT)/$(PACKAGE_NAME)
-	@install -D -m 755 $(BIN_DIR)/$(BIN) $(CURDIR)/debian/tmp/$(PACKAGE_NAME)$(GPROOT)
+	@install -D -m 755 $(BIN_DIR)/$(BIN) $(CURDIR)/debian/tmp/$(PACKAGE_NAME)$(GPROOT)/$(PACKAGE_NAME)/$(BIN)
 
 override_dh_dwz:
 	@echo "Skipping debug symbols compression (not working properly with Golang)"
