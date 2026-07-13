@@ -26,3 +26,25 @@ Event          | Branches / refs
 -------------- | ---------------
 `push`         | `master`, tags
 `pull_request` | all branches
+
+## release.yml
+
+Uploads the `.deb`/`.ddeb` packages built by `build_and_package.yml` to a
+GitHub Release.
+
+### What it does
+
+1. Waits for the `Build and package DEB` workflow run for the
+   released tag's commit to complete successfully
+2. Downloads its `gpbackup-s3-plugin-deb-ubuntu<version>` artifact (falling
+   back to the Actions cache if the artifact has expired)
+3. Renames each package to include the OS revision suffix and uploads it to
+   the release
+
+Uses `greengagedb/greengage-ci/.github/actions/upload-pkgs-to-release`.
+
+### Triggers
+
+Event      | Types
+---------- | --------
+`release`  | `released`
