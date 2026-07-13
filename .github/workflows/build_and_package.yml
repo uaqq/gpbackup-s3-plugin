@@ -1,5 +1,5 @@
 # .github/workflows/build_and_package.yml
-name: Build, test and Package in Docker
+name: Build and package DEB
 
 on:
   push:
