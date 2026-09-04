@@ -26,6 +26,10 @@ make build
 ```
 This will build the `gpbackup_s3_plugin` binary in `$HOME/go/bin`.
 
+The version string is derived from git tags. A GitHub source archive of a
+tagged release carries its version automatically; for any other build without
+git metadata, pass it explicitly: `make build PLUGIN_VERSION=X.Y.Z`.
+
 **Install**
 ```bash
 make install

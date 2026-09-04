@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+# gpbackup-s3-plugin is version-independent and installed once under GPROOT.
+# Expose it as $GPHOME/bin/gpbackup_s3_plugin for every installed Greengage,
+# so the paths used throughout the README work as written
+# (mirrors gpbackup's postinst).
+PLUGIN_BIN=/opt/greengagedb/gpbackup-s3-plugin/bin
+
+for gphome in /opt/greengagedb/greengage*/; do
+    [ -d "${gphome}bin" ] || continue
+    ln -sf "${PLUGIN_BIN}/gpbackup_s3_plugin" "${gphome}bin/gpbackup_s3_plugin"
+done
+
+#DEBHELPER#

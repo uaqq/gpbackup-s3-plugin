@@ -41,7 +41,7 @@ ENV PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
 
 FROM base AS build
 
-RUN  mkdir bin deb-packages && chown gpadmin:gpadmin bin deb-packages
+RUN  mkdir deb-packages && chown gpadmin:gpadmin deb-packages
 COPY --chown=gpadmin:gpadmin . src
 
 USER gpadmin
@@ -58,5 +58,5 @@ USER gpadmin
 
 COPY --from=code  /home/gpadmin/src src
 COPY --from=build /home/gpadmin/src/VERSION src
-COPY --from=build $GOPATH/bin bin
+COPY --from=build $GOPATH/bin/gpbackup_s3_plugin bin/
 COPY --from=build /home/gpadmin/deb-packages deb-packages

@@ -29,7 +29,7 @@ jobs:
           fetch-tags: true
 
       - name: Build Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ci/Dockerfile.ubuntu
@@ -58,10 +58,14 @@ jobs:
           path: artifacts/bin/
 
       - name: Test deb package installation
-        uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v44
+        uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v45
         with:
           test_docker: 'ubuntu:${{ matrix.os_version }}'
           artifact_name: 'gpbackup-s3-plugin-deb-ubuntu${{ matrix.os_version }}'
           add_greengage_repo: true
-          greengage_repo_url: "https://storage.yandexcloud.net/greengage-repo"
-          verify_commands: dpkg -l gpbackup*
+          verify_commands: |
+            dpkg -s gpbackup-s3-plugin > /dev/null && \
+            /opt/greengagedb/gpbackup-s3-plugin/bin/gpbackup_s3_plugin --version && \
+            GPHOME=$(ls -d /opt/greengagedb/greengage*/ | head -1) && \
+            test -L "${GPHOME}bin/gpbackup_s3_plugin" && \
+            "${GPHOME}bin/gpbackup_s3_plugin" --version
