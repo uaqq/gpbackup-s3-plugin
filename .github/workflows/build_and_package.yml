@@ -63,7 +63,6 @@ jobs:
           test_docker: 'ubuntu:${{ matrix.os_version }}'
           artifact_name: 'gpbackup-s3-plugin-deb-ubuntu${{ matrix.os_version }}'
           add_greengage_repo: true
-          greengage_repo_url: "https://storage.yandexcloud.net/greengage-repo"
           verify_commands: |
             dpkg -s gpbackup-s3-plugin > /dev/null && \
             /opt/greengagedb/gpbackup-s3-plugin/bin/gpbackup_s3_plugin --version && \
