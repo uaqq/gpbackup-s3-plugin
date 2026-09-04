@@ -32,6 +32,18 @@ GOIMPORTS=$(GOPATH)/bin/goimports
 GO_ENV=GO111MODULE=on # ensure the project still compiles in $GOPATH/src using golang versions 1.12 and below
 DEBUG=-gcflags=all="-N -l"
 
+# Metadata vars
+GPROOT					:= /opt/greengagedb
+PACKAGE_NAME		:= $(shell grep '^Package:' debian/control | head -1 | awk '{print $$2}')
+MAINTAINER			:= $(shell grep '^Maintainer:' debian/control | sed 's/Maintainer: //')
+DATE_RFC				:= $(shell date -R)
+DISTRO_CODENAME := $(shell lsb_release -sc)
+IS_RELEASE      := $(if $(findstring +dev,$(GIT_VERSION)),no,yes)
+BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build)
+DEB_TOPDIR			?= $(CURDIR)/../deb-packages
+RPM_TOPDIR			?= $(CURDIR)/../RPM
+PLUGIN_HOME 		?= $(GPROOT)/$(PACKAGE_NAME)
+
 # Prefer gpsync as the newer utility, fall back to gpscp if not present (older installs)
 ifeq (, $(shell which gpsync))
 COPYUTIL=gpscp
@@ -79,11 +91,12 @@ build_mac : depend
 install : build
 		@psql -t -d template1 -c 'select distinct hostname from gp_segment_configuration' > /tmp/seg_hosts 2>/dev/null; \
 		if [ $$? -eq 0 ]; then \
-			$(COPYUTIL) -f /tmp/seg_hosts $(BIN_DIR)/$(S3_PLUGIN) =:$(GPHOME)/bin/$(S3_PLUGIN); \
+			gpssh -f /tmp/seg_hosts -e "mkdir -p $(PLUGIN_HOME)/bin"; \
+			$(COPYUTIL) -f /tmp/seg_hosts $(BIN_DIR)/$(S3_PLUGIN) =:$(PLUGIN_HOME)/bin/$(S3_PLUGIN); \
 			if [ $$? -eq 0 ]; then \
-				echo 'Successfully copied gpbackup_s3_plugin to $(GPHOME) on all segments'; \
+				echo 'Successfully copied gpbackup_s3_plugin to $(PLUGIN_HOME) on all segments'; \
 			else \
-				echo 'Failed to copy gpbackup_s3_plugin to $(GPHOME)'; \
+				echo 'Failed to copy gpbackup_s3_plugin to $(PLUGIN_HOME)'; \
 			fi; \
 		else \
 			echo 'Database is not running, please start the database and run this make target again'; \
@@ -93,17 +106,6 @@ install : build
 #---------------------------------------------------------------------
 # Packaging targets with changelog options
 #---------------------------------------------------------------------
-
-# Metadata vars
-GPROOT			:= /opt/greengagedb
-PACKAGE_NAME	:= $(shell grep '^Package:' debian/control | head -1 | awk '{print $$2}')
-MAINTAINER		:= $(shell grep '^Maintainer:' debian/control | sed 's/Maintainer: //')
-DATE_RFC		:= $(shell date -R)
-DISTRO_CODENAME := $(shell lsb_release -sc)
-IS_RELEASE      := $(if $(findstring +dev,$(GIT_VERSION)),no,yes)
-BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build)
-DEB_TOPDIR		?= $(CURDIR)/../deb-packages
-RPM_TOPDIR		?= $(CURDIR)/../RPM
 
 # Generate for Dockerfile where .git is absent
 VERSION :

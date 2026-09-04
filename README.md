@@ -45,11 +45,11 @@ Runs the unit tests
 ## S3 Storage Plugin Configuration File Format
 The configuration file specifies the absolute path to the gpbackup_s3_plugin executable, AWS connection credentials, and S3 location.
 
-The configuration file must be a valid YAML document in the following format: 
+The configuration file must be a valid YAML document in the following format:
 
 ```
 executablepath: <absolute-path-to-gpbackup_s3_plugin>
-options: 
+options:
   region: <aws-region>
   endpoint: <s3-endpoint>
   aws_access_key_id: <aws-user-id>
@@ -61,7 +61,7 @@ options:
   http_proxy: <http-proxy>
  ```
 
-`executablepath` is the absolute path to the plugin executable (eg: use the fully expanded path of $GPHOME/bin/gpbackup_s3_plugin).
+`executablepath` is the absolute path to the plugin executable (eg: use the fully expanded path of /opt/greengagedb/gpbackup-s3-plugin/bin/gpbackup_s3_plugin).
 
 Below are the s3 plugin options
 
@@ -85,8 +85,8 @@ Below are the s3 plugin options
 This is an example S3 storage plugin configuration file that is used in the next gpbackup example command. The name of the file is s3-test-config.yaml.
 
 ```
-executablepath: $GPHOME/bin/gpbackup_s3_plugin
-options: 
+executablepath: /opt/greengagedb/gpbackup-s3-plugin/bin/gpbackup_s3_plugin
+options:
   region: us-west-2
   aws_access_key_id: test-s3-user
   aws_secret_access_key: asdf1234asdf

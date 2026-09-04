@@ -65,7 +65,4 @@ jobs:
           add_greengage_repo: true
           verify_commands: |
             dpkg -s gpbackup-s3-plugin > /dev/null && \
-            /opt/greengagedb/gpbackup-s3-plugin/bin/gpbackup_s3_plugin --version && \
-            GPHOME=$(ls -d /opt/greengagedb/greengage*/ | head -1) && \
-            test -L "${GPHOME}bin/gpbackup_s3_plugin" && \
-            "${GPHOME}bin/gpbackup_s3_plugin" --version
+            /opt/greengagedb/gpbackup-s3-plugin/bin/gpbackup_s3_plugin --version
