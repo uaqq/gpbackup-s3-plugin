@@ -23,3 +23,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Local excludes in root directory
+/Package/
+/.debuilder.lock
