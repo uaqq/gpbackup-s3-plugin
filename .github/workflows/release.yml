@@ -1,0 +1,28 @@
+# .github/workflows/release.yml
+name: GreengageDB gpbackup-s3-plugin Release
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  upload-to-release:
+    strategy:
+      fail-fast: false
+      matrix:
+        target_os_version:
+        - '22.04'
+        - '24.04'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Upload packages to release
+        uses: greengagedb/greengage-ci/.github/actions/upload-pkgs-to-release@v45
+        with:
+          target_os: ubuntu
+          extensions: deb ddeb
+          artifact_prefix: deb-packages-gpbackup-s3-plugin
+          target_os_version: ${{ matrix.target_os_version }}
+          workflow_for_waiting: Build and package DEB

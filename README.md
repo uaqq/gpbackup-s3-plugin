@@ -38,14 +38,39 @@ make test
 ```
 Runs the unit tests
 
+## Building a DEB package
+
+`.deb` packages are built using debhelper (`debian/`, `package.mk`). See
+[debian/README.md](debian/README.md) for the full packaging reference
+(environment variables, generated files, build flow).
+
+Local build in a container (recommended — runs in the Greengage developer
+image, no need to install Go or the Debian packaging toolchain on the host):
+
+```bash
+ci/build_in_docker_local.sh          # Ubuntu 22.04
+ci/build_in_docker_local.sh 24.04
+```
+
+Local build on a host with Go (in `PATH` or `/usr/local/go/bin`) and
+`debhelper`/`devscripts` installed:
+
+```bash
+make -f package.mk pkg
+```
+
+Resulting `.deb`, `.ddeb`, `.build`, `.buildinfo`, and `.changes` land
+in `./Package/gpbackup-s3-plugin_${PACKAGE_VERSION}/`. The output
+directory can be overridden with `DEB_PACKAGES`.
+
 ## S3 Storage Plugin Configuration File Format
 The configuration file specifies the absolute path to the gpbackup_s3_plugin executable, AWS connection credentials, and S3 location.
 
-The configuration file must be a valid YAML document in the following format: 
+The configuration file must be a valid YAML document in the following format:
 
 ```
 executablepath: <absolute-path-to-gpbackup_s3_plugin>
-options: 
+options:
   region: <aws-region>
   endpoint: <s3-endpoint>
   aws_access_key_id: <aws-user-id>
@@ -57,7 +82,7 @@ options:
   http_proxy: <http-proxy>
  ```
 
-`executablepath` is the absolute path to the plugin executable (eg: use the fully expanded path of $GPHOME/bin/gpbackup_s3_plugin).
+`executablepath` is the absolute path to the plugin executable (eg: use the fully expanded path of /opt/greengagedb/gpbackup-s3-plugin/bin/gpbackup_s3_plugin).
 
 Below are the s3 plugin options
 
@@ -81,8 +106,8 @@ Below are the s3 plugin options
 This is an example S3 storage plugin configuration file that is used in the next gpbackup example command. The name of the file is s3-test-config.yaml.
 
 ```
-executablepath: $GPHOME/bin/gpbackup_s3_plugin
-options: 
+executablepath: /opt/greengagedb/gpbackup-s3-plugin/bin/gpbackup_s3_plugin
+options:
   region: us-west-2
   aws_access_key_id: test-s3-user
   aws_secret_access_key: asdf1234asdf
